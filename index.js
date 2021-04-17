@@ -13,10 +13,10 @@ const app  = express()
 app.use(bodyParser.json());
 app.use(cors());
 
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
-    res.send('welcome to Computer Doctor')
+    res.send('welcome to Computer Doctor service')
 })
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -96,8 +96,5 @@ app.post('/addAdmin', (req, res) =>{
 })
 
 });
-
-
-
 
 app.listen(process.env.PORT || port)
