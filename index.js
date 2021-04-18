@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const cors = require('cors');
 require('dotenv').config()
+const ObjectId =  require('mongodb').ObjectId
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.u6dkg.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
@@ -13,7 +14,7 @@ const app  = express()
 app.use(bodyParser.json());
 app.use(cors());
 
-const port = process.env.PORT || 5000;
+const port = 5000;
 
 app.get('/', (req, res) => {
     res.send('welcome to Computer Doctor service')
@@ -40,6 +41,7 @@ app.get('/serviceList', (req, res) => {
         res.send(documents);
     })
 })
+
 // add order
 app.post('/addOrder', (req, res) =>{
     const order = req.body;
@@ -63,6 +65,29 @@ app.get('/orderList', (req, res) => {
         res.send(documents);
     })
 })
+
+app.patch('/updateStatus', (req, res) => {
+    const ap = req.body;
+    console.log(ap);
+    console.log(ap.changedValue)
+    
+    orderCollection.updateOne(
+            { _id:ObjectId(ap._id) }, 
+            {
+            $set: {  "status" : ap.changedValue },
+            $currentDate: { "lastModified": true }
+            },
+          (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).send({ message: err })
+            }
+            else {
+                res.send(result);
+                console.log(result);
+            }
+        })
+    });
 // review
 app.post('/addReviews', (req, res) =>{
     const reviews = req.body;
@@ -93,6 +118,18 @@ app.post('/addAdmin', (req, res) =>{
         res.send(admin.length > 0);
     })
     
+})
+
+// Modification
+app.delete('/deleteProduct/:id',(req,res) => {
+    const id = ObjectId(req.params.id)
+    serviceCollection?.deleteOne({
+        _id: id
+    })
+    .then( result => {
+        console.log('delete',result)
+        res.send(result.deletedCount > 0)
+    })
 })
 
 });
